@@ -38,7 +38,7 @@ export default async function TeamRosterPage({
 
   const { data: members } = await supabase
     .from("team_members")
-    .select("user_id, role, created_at")
+    .select("user_id, role, redeemed_by_invite_id, created_at")
     .eq("team_id", teamId)
     .order("created_at", { ascending: true });
 
@@ -49,6 +49,16 @@ export default async function TeamRosterPage({
     : { data: [] };
 
   const profileById = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
+
+  const inviteIds = [
+    ...new Set((members ?? []).map((member) => member.redeemed_by_invite_id).filter((id): id is string => Boolean(id))),
+  ];
+  const { data: invitesUsed } = inviteIds.length
+    ? await supabase.from("invites").select("id, label, token").in("id", inviteIds)
+    : { data: [] };
+  const inviteLabelById = new Map(
+    (invitesUsed ?? []).map((invite) => [invite.id, invite.label || `Link ${invite.token.slice(0, 6)}`])
+  );
   const isCaptainHere = (members ?? []).some(
     (member) => member.user_id === membership.userId && member.role === "captain"
   );
@@ -113,15 +123,25 @@ export default async function TeamRosterPage({
                 key={member.user_id}
                 className="flex items-center justify-between rounded-md border px-3 py-2"
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">
-                    {profile?.full_name || profile?.email || member.user_id}
-                  </span>
-                  {member.role === "captain" ? (
-                    <Badge variant="secondary">
-                      <Crown />
-                      Kapitän
-                    </Badge>
+                <div className="flex flex-col gap-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">
+                      {profile?.full_name || profile?.email || member.user_id}
+                    </span>
+                    {member.role === "captain" ? (
+                      <Badge variant="secondary">
+                        <Crown />
+                        Kapitän
+                      </Badge>
+                    ) : null}
+                  </div>
+                  {canManage ? (
+                    <span className="text-xs text-muted-foreground">
+                      Beigetreten über:{" "}
+                      {member.redeemed_by_invite_id
+                        ? inviteLabelById.get(member.redeemed_by_invite_id) ?? "Einladungslink"
+                        : "Manuell hinzugefügt"}
+                    </span>
                   ) : null}
                 </div>
                 {canManage ? (

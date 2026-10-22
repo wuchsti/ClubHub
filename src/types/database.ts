@@ -131,6 +131,7 @@ export interface Database {
           team_id: string;
           user_id: string;
           role: TeamRole;
+          redeemed_by_invite_id: string | null;
           created_at: string;
         };
         Insert: {
@@ -138,6 +139,7 @@ export interface Database {
           team_id: string;
           user_id: string;
           role?: TeamRole;
+          redeemed_by_invite_id?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["team_members"]["Insert"]>;
@@ -226,9 +228,10 @@ export interface Database {
           team_id: string | null;
           token: string;
           role: AppRole;
+          label: string | null;
           max_uses: number;
           use_count: number;
-          expires_at: string;
+          expires_at: string | null;
           created_by: string | null;
           created_at: string;
         };
@@ -238,9 +241,10 @@ export interface Database {
           team_id?: string | null;
           token?: string;
           role?: AppRole;
+          label?: string | null;
           max_uses?: number;
           use_count?: number;
-          expires_at?: string;
+          expires_at?: string | null;
           created_by: string;
           created_at?: string;
         };
