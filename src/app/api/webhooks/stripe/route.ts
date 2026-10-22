@@ -55,6 +55,7 @@ export async function POST(request: Request) {
               status: "active",
               member_limit: PLAN_LIMITS[plan].members,
               team_limit: PLAN_LIMITS[plan].teams,
+              plan_valid_until: null,
               stripe_subscription_id:
                 typeof session.subscription === "string" ? session.subscription : null,
             })
@@ -96,6 +97,7 @@ export async function POST(request: Request) {
               ? {
                   member_limit: PLAN_LIMITS[effectivePlan].members,
                   team_limit: PLAN_LIMITS[effectivePlan].teams,
+                  plan_valid_until: null,
                 }
               : {}),
             stripe_subscription_id: subscription.id,

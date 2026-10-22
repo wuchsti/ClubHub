@@ -18,6 +18,7 @@ export interface Database {
           status: TenantStatus;
           member_limit: number;
           team_limit: number;
+          plan_valid_until: string | null;
           stripe_customer_id: string | null;
           stripe_subscription_id: string | null;
           stripe_connect_account_id: string | null;
@@ -36,6 +37,7 @@ export interface Database {
           status?: TenantStatus;
           member_limit?: number;
           team_limit?: number;
+          plan_valid_until?: string | null;
           stripe_customer_id?: string | null;
           stripe_subscription_id?: string | null;
           stripe_connect_account_id?: string | null;

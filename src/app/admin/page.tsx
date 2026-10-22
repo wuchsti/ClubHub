@@ -21,7 +21,7 @@ export default async function AdminTenantsPage() {
 
   const { data: tenants } = await supabase
     .from("tenants")
-    .select("id, name, slug, plan, status, member_limit, is_suspended, created_at")
+    .select("id, name, slug, plan, status, member_limit, plan_valid_until, is_suspended, created_at")
     .order("created_at", { ascending: false });
 
   const { data: memberships } = await supabase.from("memberships").select("tenant_id");
@@ -57,6 +57,11 @@ export default async function AdminTenantsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline">{PLAN_LABELS[tenant.plan] ?? tenant.plan}</Badge>
+                {tenant.plan_valid_until ? (
+                  <Badge variant="secondary">
+                    bis {new Date(tenant.plan_valid_until).toLocaleDateString("de-DE")}
+                  </Badge>
+                ) : null}
                 <Badge variant={tenant.status === "active" ? "default" : "secondary"}>
                   {STATUS_LABELS[tenant.status] ?? tenant.status}
                 </Badge>

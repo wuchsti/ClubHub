@@ -56,7 +56,12 @@ function SponsorBanner({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm text-muted-foreground">Sponsor des Tages</CardTitle>
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-sm text-muted-foreground">Sponsor des Tages</CardTitle>
+          <span className="rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            Anzeige
+          </span>
+        </div>
       </CardHeader>
       <CardContent className="flex h-16 items-center justify-center rounded-md bg-white">
         {linkUrl ? (

@@ -2,6 +2,8 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { PLAN_LIMITS } from "@/lib/plan-limits";
+import { currentTimestamp } from "@/lib/time";
 import type { AppRole } from "@/types/database";
 
 export type MembershipContext = {
@@ -38,9 +40,30 @@ export const getMembershipContext = cache(async (): Promise<MembershipContext> =
 
   const { data: tenant } = await supabase
     .from("tenants")
-    .select("name, slug, is_suspended")
+    .select("name, slug, is_suspended, plan, plan_valid_until")
     .eq("id", membership.tenant_id)
     .single();
+
+  // A manually-granted (non-Stripe) plan can carry a term. Once it lapses,
+  // revert to Starter right here - the next page load by anyone in this
+  // tenant is what enforces it, no cron job needed.
+  if (
+    tenant &&
+    tenant.plan !== "starter" &&
+    tenant.plan_valid_until &&
+    new Date(tenant.plan_valid_until).getTime() < currentTimestamp()
+  ) {
+    const starterLimits = PLAN_LIMITS.starter;
+    await supabase
+      .from("tenants")
+      .update({
+        plan: "starter",
+        member_limit: starterLimits.members,
+        team_limit: starterLimits.teams,
+        plan_valid_until: null,
+      })
+      .eq("id", membership.tenant_id);
+  }
 
   if (tenant?.is_suspended) {
     const { data: profile } = await supabase

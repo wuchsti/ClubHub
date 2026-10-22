@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
-import { setTenantSuspended, updateMemberLimit } from "./actions";
+import { setTenantPlan, setTenantSuspended, updateMemberLimit } from "./actions";
+import { PLANS } from "@/lib/plans";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -25,7 +26,7 @@ export default async function AdminTenantDetailPage({
   const { data: tenant } = await supabase
     .from("tenants")
     .select(
-      "id, name, slug, plan, status, member_limit, is_suspended, stripe_customer_id, stripe_subscription_id, stripe_connect_account_id, stripe_connect_charges_enabled, created_at"
+      "id, name, slug, plan, status, member_limit, plan_valid_until, is_suspended, stripe_customer_id, stripe_subscription_id, stripe_connect_account_id, stripe_connect_charges_enabled, created_at"
     )
     .eq("id", tenantId)
     .single();
@@ -66,6 +67,12 @@ export default async function AdminTenantDetailPage({
             <CardDescription>
               Tarif: {tenant.plan} · Abo-Status: {tenant.status} · {memberCount}/{tenant.member_limit}{" "}
               Mitglieder
+              {tenant.plan_valid_until ? (
+                <>
+                  {" "}
+                  · befristet bis {new Date(tenant.plan_valid_until).toLocaleDateString("de-DE")}
+                </>
+              ) : null}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
@@ -92,6 +99,51 @@ export default async function AdminTenantDetailPage({
                   Speichern
                 </Button>
               </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Tarif manuell setzen</CardTitle>
+            <CardDescription>
+              Für Partner-Vereine, Presse-Demos o. Ä. – unabhängig von Stripe. Mit Laufzeit fällt der
+              Verein automatisch auf Starter zurück, sobald jemand aus dem Verein die App nach
+              Ablauf das nächste Mal öffnet.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form action={setTenantPlan} className="flex flex-col gap-3">
+              <input type="hidden" name="tenantId" value={tenant.id} />
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="plan">Tarif</Label>
+                <select
+                  id="plan"
+                  name="plan"
+                  defaultValue={tenant.plan}
+                  className="h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs"
+                >
+                  {PLANS.map((plan) => (
+                    <option key={plan.key} value={plan.key}>
+                      {plan.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="validUntil">
+                  Laufzeit bis <span className="text-muted-foreground">(leer = unbegrenzt)</span>
+                </Label>
+                <Input
+                  id="validUntil"
+                  name="validUntil"
+                  type="date"
+                  defaultValue={tenant.plan_valid_until?.slice(0, 10) ?? ""}
+                />
+              </div>
+              <Button type="submit" className="self-start">
+                Tarif setzen
+              </Button>
             </form>
           </CardContent>
         </Card>
