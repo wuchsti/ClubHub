@@ -12,6 +12,7 @@ import {
 import { getMembershipContext, isTenantManager } from "@/lib/membership";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PushNotificationButton } from "@/components/push-notification-button";
 
 const ROLE_LABELS: Record<string, string> = {
   owner: "Vorstand",
@@ -53,12 +54,17 @@ export default async function DashboardLayout({
           </div>
           <Badge variant="secondary">{ROLE_LABELS[membership.role] ?? membership.role}</Badge>
         </div>
-        <form action="/auth/signout" method="post">
-          <Button type="submit" variant="ghost" size="sm">
-            <LogOut />
-            Abmelden
-          </Button>
-        </form>
+        <div className="flex items-center gap-2">
+          {process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ? (
+            <PushNotificationButton vapidPublicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY} />
+          ) : null}
+          <form action="/auth/signout" method="post">
+            <Button type="submit" variant="ghost" size="sm">
+              <LogOut />
+              Abmelden
+            </Button>
+          </form>
+        </div>
       </header>
       <div className="flex flex-1">
         <nav className="hidden w-56 flex-col gap-1 border-r p-4 sm:flex">

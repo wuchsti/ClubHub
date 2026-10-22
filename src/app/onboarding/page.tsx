@@ -37,7 +37,7 @@ export default async function OnboardingPage({
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-6">
+    <main className="flex min-h-screen items-center justify-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-xl">Deinen Verein anlegen</CardTitle>
@@ -83,6 +83,6 @@ export default async function OnboardingPage({
           </form>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

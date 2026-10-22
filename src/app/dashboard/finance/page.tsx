@@ -19,10 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-function formatEuro(cents: number): string {
-  return (cents / 100).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
-}
+import { formatEuro } from "@/lib/money";
 
 export default async function FinancePage({
   searchParams,

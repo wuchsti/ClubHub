@@ -20,7 +20,7 @@ export default async function SignupPage({
   const isInvite = redirectTo?.startsWith("/invite/");
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-6">
+    <main className="flex min-h-screen items-center justify-center p-6">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">
@@ -74,6 +74,6 @@ export default async function SignupPage({
           </p>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

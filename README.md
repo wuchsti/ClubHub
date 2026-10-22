@@ -32,6 +32,8 @@ Micro-SaaS für deutsche Sportvereine (DSGVO-konform).
    - `20261022030000_phase4_platform_admin.sql` – `platform_sponsors`,
      `tenants.is_suspended`, die `is_platform_admin()`-Funktion und
      zugehörige RLS-Policies, Storage-Bucket `platform-sponsor-logos`.
+   - `20261022040000_phase5_push_subscriptions.sql` – `push_subscriptions`
+     für Web-Push-Benachrichtigungen (siehe Phase 5).
 4. Den ersten Platform-Admin freischalten (es gibt dafür bewusst keine
    Self-Service-UI): in der Supabase SQL-Konsole
 
@@ -51,15 +53,61 @@ Micro-SaaS für deutsche Sportvereine (DSGVO-konform).
    - Den *service_role*-Key aus den Supabase Project Settings eintragen
      (wird nur serverseitig vom Webhook verwendet, niemals an den Browser
      ausgeliefert).
-6. Abhängigkeiten installieren und Dev-Server starten:
+6. Für Push-Benachrichtigungen (Phase 5) ein VAPID-Schlüsselpaar erzeugen
+   und in `.env.local` eintragen:
+
+   ```bash
+   npx web-push generate-vapid-keys
+   ```
+
+7. Abhängigkeiten installieren und Dev-Server starten:
 
    ```bash
    npm install
    npm run dev
    ```
 
-7. Unter `/signup` einen Account erstellen, die Bestätigungs-E-Mail öffnen und
+8. Unter `/signup` einen Account erstellen, die Bestätigungs-E-Mail öffnen und
    anschließend unter `/onboarding` den ersten Verein anlegen.
+
+## Tests
+
+```bash
+npm run test    # Vitest: Unit-Tests + Schema-Sanity-Checks gegen supabase/migrations/*.sql
+npm run lint
+npm run build
+```
+
+Die Schema-Sanity-Tests (`test/schema.test.ts`) parsen alle Migrationsdateien
+statisch und stellen sicher, dass jede neu angelegte Tabelle RLS aktiviert
+hat, mindestens eine Policy existiert und jeder Storage-Bucket eine
+`storage.objects`-Policy hat – ganz ohne laufende Datenbank. `.github/workflows/ci.yml`
+führt das bei jedem Push/PR aus und spült zusätzlich alle Migrationen gegen
+einen echten lokalen Supabase-Stack (`supabase start` + `supabase db push`),
+um Supabase-spezifisches Verhalten (`auth.users`, `auth.uid()`,
+`storage.buckets`) abzudecken, das eine reine Postgres-Instanz nicht bieten
+kann.
+
+## Deployment
+
+**Vercel (empfohlen für den Start):** Repo importieren, die Variablen aus
+`.env.local.example` in den Project Settings eintragen, fertig – Next.js
+läuft dort zero-config inkl. automatischem SSL.
+
+**Self-hosted (z. B. netcup) via Docker:**
+
+```bash
+docker build -t clubhub .
+docker run -p 3000:3000 --env-file .env.local clubhub
+# oder: docker compose up -d
+```
+
+Der `Dockerfile` nutzt Next.js' `output: "standalone"` für ein schlankes
+Image. Davor einen Reverse Proxy (Caddy, Nginx, Traefik) mit eigenem
+Let's-Encrypt-Zertifikat für SSL + eigene Domain schalten. **Hinweis:**
+Der Docker-Build wurde in dieser Sandbox nicht ausgeführt (kein laufender
+Docker-Daemon verfügbar) – vor dem Produktiveinsatz lokal `docker build`
+verifizieren.
 
 ## Entwicklungsstand (Roadmap)
 
@@ -69,7 +117,7 @@ Micro-SaaS für deutsche Sportvereine (DSGVO-konform).
 | **2** | Core Features (Termine & Kader-Logik) | ✅ umgesetzt in diesem Branch |
 | **3** | Finanzen, Kassenbuch & Sponsoring | ✅ umgesetzt in diesem Branch |
 | **4** | Rechtliches, statische Seiten & Admin-Overlord | ✅ umgesetzt in diesem Branch |
-| 5 | Testing, Optimierung & Deployment | geplant |
+| **5** | Testing, Optimierung & Deployment | ✅ umgesetzt in diesem Branch |
 
 ### Phase 1 im Detail
 
@@ -169,5 +217,48 @@ Micro-SaaS für deutsche Sportvereine (DSGVO-konform).
   vorhanden) deren eigenen lokalen Sponsor – passend zur "mit
   Werbung"/"werbefrei"-Unterscheidung in der Preistabelle.
 
-Phase 5 (Testing, Optimierung & Deployment) ist in der vollständigen SRS
-beschrieben und folgt in einer weiteren Iteration.
+### Phase 5 im Detail
+
+- **Automatisierte Tests:** Vitest-Setup (`vitest.config.ts`) mit
+  Unit-Tests für `slugify`, `euroToCents`/`formatEuro`, `pickRandom`,
+  `isTenantManager` sowie Komponenten-Tests für `RsvpWidget`
+  (React Testing Library). Die Schema-Sanity-Tests oben prüfen die
+  Migrationen statisch.
+- **CI (`.github/workflows/ci.yml`):** Job 1 führt Lint/Test/Build aus
+  (identisch zu den oben genannten lokalen Befehlen). Job 2 spült alle
+  Migrationen gegen einen frischen lokalen Supabase-Stack.
+- **Performance (Lighthouse):** Lokal gegen den Produktions-Build
+  gemessen (Playwright-Chromium, `npx lighthouse`) – alle öffentlichen
+  Seiten liegen deutlich über der Zielmarke von 90:
+
+  | Seite | Performance | Accessibility | Best Practices | SEO |
+  | --- | --- | --- | --- | --- |
+  | `/` | 96 | 100 | 100 | 100 |
+  | `/login` | 99 | 100 | 100 | 100 |
+  | `/signup` | 98 | 100 | 100 | 100 |
+  | `/impressum` | 99 | 100 | 100 | 100 |
+  | `/datenschutz` | 99 | 100 | 100 | 100 |
+
+  (Authentifizierte `/dashboard/*`-Seiten wurden nicht gemessen, da sie
+  eine echte Supabase-Session voraussetzen und für eine Login-geschützte
+  Area ohnehin kein öffentlicher Lighthouse-Score relevant ist.)
+- **PWA-Kompatibilität:** `public/manifest.json` + generierte Icons
+  (`public/icons/`, erzeugt via `scripts/generate-icons.mjs`) machen
+  ClubHub auf Mobilgeräten installierbar (`display: "standalone"`,
+  Start-URL `/dashboard`).
+- **Push-Benachrichtigungen für Termine:** `public/sw.js` (Service
+  Worker) + `push_subscriptions`-Tabelle (RLS: nur eigene Zeilen) +
+  "Benachrichtigungen aktivieren"-Button im Dashboard-Header
+  (`PushNotificationButton`, Web Push API mit VAPID). Beim Anlegen eines
+  Termins (`dashboard/events/new/actions.ts`) wird allen Mitgliedern der
+  betroffenen Sparte (außer dem Ersteller) serverseitig über `web-push`
+  eine Benachrichtigung geschickt (`src/lib/web-push.ts`, nutzt den
+  Service-Role-Client, da fremde Subscriptions gelesen werden müssen);
+  abgelaufene Subscriptions (404/410) werden automatisch entfernt. Eine
+  zeitgesteuerte Erinnerung vor der Rückmelde-Deadline bräuchte einen
+  externen Scheduler (z. B. Supabase Cron oder Vercel Cron) und ist nicht
+  Teil dieser Iteration.
+- **Deployment:** `next.config.ts` nutzt `output: "standalone"`; ein
+  mehrstufiger `Dockerfile` + `docker-compose.yml` fürs Self-Hosting
+  (z. B. netcup) liegen bei. Siehe Abschnitt "Deployment" oben für
+  Vercel- und Docker-Vorgehen.

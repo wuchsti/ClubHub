@@ -6,15 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getMembershipContext, isTenantManager } from "@/lib/membership";
 import { getStripe } from "@/lib/stripe";
 import { getSiteUrl } from "@/lib/site-url";
-
-function euroToCents(value: string): number | null {
-  const normalized = value.replace(",", ".").trim();
-  const euros = Number.parseFloat(normalized);
-  if (!Number.isFinite(euros) || euros <= 0) {
-    return null;
-  }
-  return Math.round(euros * 100);
-}
+import { euroToCents } from "@/lib/money";
 
 function fail(message: string): never {
   redirect(`/dashboard/finance?error=${encodeURIComponent(message)}`);

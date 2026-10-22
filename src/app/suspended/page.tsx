@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export default function SuspendedPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center p-6">
+    <main className="flex min-h-screen items-center justify-center p-6">
       <Card className="w-full max-w-sm text-center">
         <CardHeader>
           <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-secondary">
@@ -25,6 +25,6 @@ export default function SuspendedPage() {
           </form>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

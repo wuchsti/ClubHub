@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main, claude/clubhub-srs-roadmap-oiossa]
+  pull_request:
+
+jobs:
+  build-test:
+    name: Lint, test, build
+    runs-on: ubuntu-latest
+    env:
+      # Dummy values: nothing at build time actually calls out to Supabase
+      # or Stripe (every page that needs them renders dynamically, not at
+      # build time), but the modules read these at import/module scope so
+      # the build needs *something* defined.
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+      SUPABASE_SERVICE_ROLE_KEY: placeholder
+      STRIPE_SECRET_KEY: sk_test_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_placeholder
+      STRIPE_PRICE_PRO: price_pro_placeholder
+      STRIPE_PRICE_ALLIN: price_allin_placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run build
+
+  supabase-migrations:
+    name: Apply migrations to a local Supabase stack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      # Spins up the full local stack (Postgres + Auth + Storage, via
+      # Docker) and applies every migration in supabase/migrations against
+      # it in order. This is the schema test that actually exercises
+      # Supabase-specific bits our migrations depend on (auth.users,
+      # auth.uid(), storage.buckets) that a bare Postgres container can't
+      # provide.
+      - run: supabase start
+      - run: supabase db push --local
+      - run: supabase stop

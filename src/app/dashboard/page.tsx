@@ -5,6 +5,7 @@ import { getMembershipContext } from "@/lib/membership";
 import { upsertRsvp } from "./events/[eventId]/actions";
 import { RsvpWidget } from "@/components/rsvp-widget";
 import { SponsorCard } from "@/components/sponsor-card";
+import { formatEuro } from "@/lib/money";
 import {
   Card,
   CardContent,
@@ -118,9 +119,7 @@ export default async function DashboardPage() {
               <PiggyBank className="size-5 text-muted-foreground" />
               <CardTitle className="text-base">Offene Beträge</CardTitle>
               <CardDescription>
-                {openTotalCents > 0
-                  ? `${(openTotalCents / 100).toLocaleString("de-DE", { minimumFractionDigits: 2 })} €`
-                  : "Keine offenen Posten."}
+                {openTotalCents > 0 ? formatEuro(openTotalCents) : "Keine offenen Posten."}
               </CardDescription>
             </CardHeader>
             <CardContent>

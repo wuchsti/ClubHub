@@ -1,0 +1,11 @@
+# Minimal self-hosting example. Point a reverse proxy (Caddy, Nginx, Traefik)
+# with your own TLS/Let's Encrypt setup at this service - see README for
+# the full deployment notes. Not exercised in CI (no Docker daemon there).
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
