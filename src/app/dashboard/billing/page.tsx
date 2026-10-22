@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { PLANS } from "@/lib/plans";
+import { LAUNCHED_PLANS, PLANS } from "@/lib/plans";
 
 export default async function BillingPage({
   searchParams,
@@ -61,8 +61,8 @@ export default async function BillingPage({
         </p>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {PLANS.map((plan) => (
+      <div className="grid gap-4 sm:grid-cols-2">
+        {LAUNCHED_PLANS.map((plan) => (
           <Card key={plan.key} className={plan.key === currentPlan ? "border-primary" : ""}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-base">

@@ -5,23 +5,31 @@ export const PLANS: {
   name: string;
   price: string;
   features: string[];
+  /** Whether this tier is currently offered publicly (pricing page, billing upgrade). */
+  launched: boolean;
 }[] = [
   {
     key: "starter",
     name: "Starter",
     price: "0 € / Monat",
     features: ["Bis 15 Mitglieder", "Basis-Termine", "Mit Werbung"],
+    launched: true,
   },
   {
     key: "pro",
     name: "Pro Team",
     price: "9,90 € / Monat",
     features: ["Unbegrenzt Mitglieder", "Kassenbuch/SEPA", "Werbefrei"],
+    launched: true,
   },
   {
     key: "allin",
     name: "Club All-In",
     price: "29,90 € / Monat",
-    features: ["Alle Teams", "Custom Domain", "100% Sponsoren-Erlöse"],
+    features: ["Alle Sparten/Teams", "100% Sponsoren-Erlöse", "Priorisierter Support"],
+    launched: false,
   },
 ];
+
+/** Plans shown on the public pricing page and billing upgrade options. */
+export const LAUNCHED_PLANS = PLANS.filter((plan) => plan.launched);

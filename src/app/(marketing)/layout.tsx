@@ -10,7 +10,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           ClubHub
         </Link>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground sm:flex">
-          <Link href="/#features" className="hover:text-foreground">
+          <Link href="/features" className="hover:text-foreground">
             Features
           </Link>
           <Link href="/#preise" className="hover:text-foreground">
