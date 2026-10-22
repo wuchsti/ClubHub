@@ -21,6 +21,8 @@ export interface Database {
           stripe_subscription_id: string | null;
           stripe_connect_account_id: string | null;
           stripe_connect_charges_enabled: boolean;
+          is_suspended: boolean;
+          suspended_at: string | null;
           created_by: string;
           created_at: string;
           updated_at: string;
@@ -36,6 +38,8 @@ export interface Database {
           stripe_subscription_id?: string | null;
           stripe_connect_account_id?: string | null;
           stripe_connect_charges_enabled?: boolean;
+          is_suspended?: boolean;
+          suspended_at?: string | null;
           created_by: string;
           created_at?: string;
           updated_at?: string;
@@ -365,9 +369,35 @@ export interface Database {
           },
         ];
       };
+      platform_sponsors: {
+        Row: {
+          id: string;
+          name: string;
+          logo_path: string;
+          link_url: string | null;
+          is_active: boolean;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          logo_path: string;
+          link_url?: string | null;
+          is_active?: boolean;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["platform_sponsors"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
+      is_platform_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
       redeem_invite: {
         Args: { p_token: string };
         Returns: { tenant_id: string; team_id: string | null; tenant_slug: string | null }[];

@@ -4,6 +4,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export async function SponsorCard({ tenantId }: { tenantId: string }) {
   const supabase = await createClient();
+  const { data: tenant } = await supabase.from("tenants").select("plan").eq("id", tenantId).single();
+
+  // Starter is the free, ad-supported tier (SA-03): it always shows a
+  // global platform banner instead of the club's own local sponsors.
+  // Pro/All-In are ad-free and show only sponsors the club set up itself.
+  if (tenant?.plan === "starter") {
+    const { data: platformSponsors } = await supabase
+      .from("platform_sponsors")
+      .select("name, logo_path, link_url")
+      .eq("is_active", true);
+
+    if (!platformSponsors?.length) {
+      return null;
+    }
+
+    const sponsor = pickRandom(platformSponsors);
+    const { data: publicUrl } = supabase.storage.from("platform-sponsor-logos").getPublicUrl(sponsor.logo_path);
+    return <SponsorBanner name={sponsor.name} linkUrl={sponsor.link_url} logoUrl={publicUrl.publicUrl} />;
+  }
+
   const { data: sponsors } = await supabase
     .from("sponsors")
     .select("name, logo_path, link_url")
@@ -16,10 +36,21 @@ export async function SponsorCard({ tenantId }: { tenantId: string }) {
 
   const sponsor = pickRandom(sponsors);
   const { data: publicUrl } = supabase.storage.from("sponsor-logos").getPublicUrl(sponsor.logo_path);
+  return <SponsorBanner name={sponsor.name} linkUrl={sponsor.link_url} logoUrl={publicUrl.publicUrl} />;
+}
 
+function SponsorBanner({
+  name,
+  linkUrl,
+  logoUrl,
+}: {
+  name: string;
+  linkUrl: string | null;
+  logoUrl: string;
+}) {
   const logo = (
     // eslint-disable-next-line @next/next/no-img-element -- external Supabase Storage URL
-    <img src={publicUrl.publicUrl} alt={sponsor.name} className="max-h-14 max-w-full object-contain" />
+    <img src={logoUrl} alt={name} className="max-h-14 max-w-full object-contain" />
   );
 
   return (
@@ -28,8 +59,8 @@ export async function SponsorCard({ tenantId }: { tenantId: string }) {
         <CardTitle className="text-sm text-muted-foreground">Sponsor des Tages</CardTitle>
       </CardHeader>
       <CardContent className="flex h-16 items-center justify-center rounded-md bg-white">
-        {sponsor.link_url ? (
-          <a href={sponsor.link_url} target="_blank" rel="noopener noreferrer">
+        {linkUrl ? (
+          <a href={linkUrl} target="_blank" rel="noopener noreferrer">
             {logo}
           </a>
         ) : (

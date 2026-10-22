@@ -29,7 +29,19 @@ Micro-SaaS für deutsche Sportvereine (DSGVO-konform).
    - `20261022020000_phase3_finance_sponsoring.sql` – `penalty_catalog`,
      `ledger_entries`, `sponsors`, Stripe-Spalten auf `tenants` sowie der
      öffentliche Storage-Bucket `sponsor-logos`.
-4. Für Phase 3 zusätzlich ein [Stripe](https://dashboard.stripe.com)-Konto
+   - `20261022030000_phase4_platform_admin.sql` – `platform_sponsors`,
+     `tenants.is_suspended`, die `is_platform_admin()`-Funktion und
+     zugehörige RLS-Policies, Storage-Bucket `platform-sponsor-logos`.
+4. Den ersten Platform-Admin freischalten (es gibt dafür bewusst keine
+   Self-Service-UI): in der Supabase SQL-Konsole
+
+   ```sql
+   update public.profiles set is_platform_admin = true where email = '<deine-email>';
+   ```
+
+   Danach ist `/admin` erreichbar (Mandanten-Übersicht, Sperren/Limits,
+   globale Sponsoren-Banner).
+5. Für Phase 3 zusätzlich ein [Stripe](https://dashboard.stripe.com)-Konto
    (Test-Modus reicht lokal) einrichten:
    - Zwei wiederkehrende Preise für die Tarife "Pro" und "All-In" anlegen
      und deren Price-IDs in `.env.local` eintragen.
@@ -39,14 +51,14 @@ Micro-SaaS für deutsche Sportvereine (DSGVO-konform).
    - Den *service_role*-Key aus den Supabase Project Settings eintragen
      (wird nur serverseitig vom Webhook verwendet, niemals an den Browser
      ausgeliefert).
-5. Abhängigkeiten installieren und Dev-Server starten:
+6. Abhängigkeiten installieren und Dev-Server starten:
 
    ```bash
    npm install
    npm run dev
    ```
 
-6. Unter `/signup` einen Account erstellen, die Bestätigungs-E-Mail öffnen und
+7. Unter `/signup` einen Account erstellen, die Bestätigungs-E-Mail öffnen und
    anschließend unter `/onboarding` den ersten Verein anlegen.
 
 ## Entwicklungsstand (Roadmap)
@@ -56,7 +68,7 @@ Micro-SaaS für deutsche Sportvereine (DSGVO-konform).
 | **1** | Fundament, Auth & Multi-Tenancy Setup | ✅ umgesetzt in diesem Branch |
 | **2** | Core Features (Termine & Kader-Logik) | ✅ umgesetzt in diesem Branch |
 | **3** | Finanzen, Kassenbuch & Sponsoring | ✅ umgesetzt in diesem Branch |
-| 4 | Rechtliches, statische Seiten & Admin-Overlord | geplant |
+| **4** | Rechtliches, statische Seiten & Admin-Overlord | ✅ umgesetzt in diesem Branch |
 | 5 | Testing, Optimierung & Deployment | geplant |
 
 ### Phase 1 im Detail
@@ -130,6 +142,32 @@ Micro-SaaS für deutsche Sportvereine (DSGVO-konform).
 > Express-Konten in Deutschland, Auszahlungsfristen und ob Rückerstattungen/
 > Streitfälle über das Verein- oder Plattform-Konto laufen sollen.
 
-Die übrigen Phasen (rechtliche Seiten, Super-Admin-Dashboard, Tests &
-Deployment) sind in der vollständigen SRS beschrieben und folgen in
-weiteren Iterationen.
+### Phase 4 im Detail
+
+- **Public Landing Page (PUB-01):** `src/app/(marketing)` – gemeinsames
+  Layout mit Header/Footer für `/`, `/impressum`, `/datenschutz`; die
+  Startseite zeigt Hero, Feature-Übersicht und dieselbe Tarif-Tabelle wie
+  `/dashboard/billing` (geteilt über `src/lib/plans.ts`).
+- **Impressum & Datenschutz (PUB-02, PUB-03):** `/impressum` (§ 5 DDG) und
+  `/datenschutz` (DSGVO, inkl. Supabase- und Stripe-Auftragsverarbeitung,
+  Cookie-Hinweis, Betroffenenrechte). Beide enthalten `[Platzhalter: ...]`
+  für Betreiberdaten, Registereintrag und Aufsichtsbehörde – **diese
+  Platzhalter müssen vor einem echten Go-Live durch eine Rechtsberatung
+  befüllt/geprüft werden**, sie sind absichtlich nicht mit erfundenen
+  Angaben gefüllt.
+- **Super-Admin-Dashboard (SA-01, SA-02):** `/admin` (geschützt durch
+  `profiles.is_platform_admin`, siehe Einrichtung oben) zeigt eine
+  Mandanten-Übersicht (Tarif, Abo-Status, Mitgliederzahl/-Limit) und pro
+  Verein unter `/admin/tenants/[tenantId]` Buttons zum Sperren/Entsperren
+  sowie zum Anpassen des Mitglieder-Limits. Ein gesperrter Verein wird
+  beim nächsten Dashboard-Aufruf seiner Mitglieder auf `/suspended`
+  umgeleitet (Platform-Admins sind davon ausgenommen).
+- **Globales Werbe-Dashboard (SA-03):** `/admin/sponsors` pflegt globale
+  Sponsoren-Banner (eigener Storage-Bucket `platform-sponsor-logos`). Die
+  `SponsorCard`-Komponente zeigt für Vereine im kostenlosen Starter-Tarif
+  immer ein zufälliges globales Banner, für Pro/All-In stattdessen (falls
+  vorhanden) deren eigenen lokalen Sponsor – passend zur "mit
+  Werbung"/"werbefrei"-Unterscheidung in der Preistabelle.
+
+Phase 5 (Testing, Optimierung & Deployment) ist in der vollständigen SRS
+beschrieben und folgt in einer weiteren Iteration.

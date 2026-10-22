@@ -38,9 +38,21 @@ export const getMembershipContext = cache(async (): Promise<MembershipContext> =
 
   const { data: tenant } = await supabase
     .from("tenants")
-    .select("name, slug")
+    .select("name, slug, is_suspended")
     .eq("id", membership.tenant_id)
     .single();
+
+  if (tenant?.is_suspended) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_platform_admin")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.is_platform_admin) {
+      redirect("/suspended");
+    }
+  }
 
   return {
     userId: user.id,

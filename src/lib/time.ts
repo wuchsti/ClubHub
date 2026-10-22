@@ -3,3 +3,7 @@
 export function currentTimestamp(): number {
   return Date.now();
 }
+
+export function currentYear(): number {
+  return new Date().getFullYear();
+}
