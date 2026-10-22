@@ -19,7 +19,7 @@ export async function signup(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -30,6 +30,14 @@ export async function signup(formData: FormData) {
 
   if (error) {
     redirect(`/signup?error=${encodeURIComponent(error.message)}`);
+  }
+
+  // If email confirmation is disabled (or this address was already confirmed),
+  // signUp() logs the user in immediately - go straight to the intended
+  // destination (e.g. an invite link) instead of the "check your email" page,
+  // which would otherwise strand the invite redirect.
+  if (data.session) {
+    redirect(redirectTo);
   }
 
   redirect("/signup/check-email");
