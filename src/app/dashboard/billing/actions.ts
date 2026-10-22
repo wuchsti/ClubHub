@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getMembershipContext, isTenantManager } from "@/lib/membership";
-import { getStripe, STRIPE_PRICE_IDS } from "@/lib/stripe";
+import { getStripe, isStripeConfigured, STRIPE_PRICE_IDS } from "@/lib/stripe";
 import { getSiteUrl } from "@/lib/site-url";
 
 type PlanKey = keyof typeof STRIPE_PRICE_IDS;
@@ -40,6 +40,13 @@ export async function createCheckoutSession(formData: FormData) {
     redirect("/dashboard/billing?error=" + encodeURIComponent("Nur Vorstand/Admin kann das Abo ändern."));
   }
 
+  if (!isStripeConfigured()) {
+    redirect(
+      "/dashboard/billing?error=" +
+        encodeURIComponent("Online-Zahlungen sind auf dieser Installation noch nicht eingerichtet.")
+    );
+  }
+
   const plan = String(formData.get("plan") ?? "") as PlanKey;
   const priceId = STRIPE_PRICE_IDS[plan];
 
@@ -74,6 +81,13 @@ export async function createPortalSession() {
 
   if (!isTenantManager(membership.role)) {
     redirect("/dashboard/billing?error=" + encodeURIComponent("Nur Vorstand/Admin kann das Abo verwalten."));
+  }
+
+  if (!isStripeConfigured()) {
+    redirect(
+      "/dashboard/billing?error=" +
+        encodeURIComponent("Online-Zahlungen sind auf dieser Installation noch nicht eingerichtet.")
+    );
   }
 
   const customerId = await requireStripeCustomer(membership.tenantId);

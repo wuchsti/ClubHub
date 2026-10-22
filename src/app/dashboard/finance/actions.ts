@@ -7,6 +7,7 @@ import { getMembershipContext, isTenantManager } from "@/lib/membership";
 import { getStripe } from "@/lib/stripe";
 import { getSiteUrl } from "@/lib/site-url";
 import { euroToCents } from "@/lib/money";
+import { requireFinanceAccess } from "@/lib/plan-gate";
 
 function fail(message: string): never {
   redirect(`/dashboard/finance?error=${encodeURIComponent(message)}`);
@@ -14,6 +15,7 @@ function fail(message: string): never {
 
 export async function createPenaltyCatalogEntry(formData: FormData) {
   const membership = await getMembershipContext();
+  await requireFinanceAccess(membership.tenantId);
 
   if (!isTenantManager(membership.role)) {
     fail("Nur Vorstand/Admin kann den Strafenkatalog pflegen.");
@@ -44,6 +46,7 @@ export async function createPenaltyCatalogEntry(formData: FormData) {
 
 export async function createLedgerEntry(formData: FormData) {
   const membership = await getMembershipContext();
+  await requireFinanceAccess(membership.tenantId);
 
   const memberId = String(formData.get("memberId") ?? "");
   const teamId = String(formData.get("teamId") ?? "") || null;
@@ -96,6 +99,7 @@ export async function voidLedgerEntry(formData: FormData) {
 export async function payLedgerEntry(formData: FormData) {
   const entryId = String(formData.get("entryId") ?? "");
   const membership = await getMembershipContext();
+  await requireFinanceAccess(membership.tenantId);
   const supabase = await createClient();
 
   const { data: entry } = await supabase

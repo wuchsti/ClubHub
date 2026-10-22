@@ -18,6 +18,10 @@ export function getStripe(): Stripe {
   return stripeClient;
 }
 
+export function isStripeConfigured(): boolean {
+  return Boolean(process.env.STRIPE_SECRET_KEY);
+}
+
 export const STRIPE_PRICE_IDS = {
   pro: process.env.STRIPE_PRICE_PRO,
   allin: process.env.STRIPE_PRICE_ALLIN,
