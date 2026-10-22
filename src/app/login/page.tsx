@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { login } from "./actions";
+import { AuthShell } from "@/components/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +20,7 @@ export default async function LoginPage({
   const { error, redirect: redirectTo } = await searchParams;
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-6">
+    <AuthShell>
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">Anmelden</CardTitle>
@@ -64,6 +65,6 @@ export default async function LoginPage({
           </p>
         </CardContent>
       </Card>
-    </main>
+    </AuthShell>
   );
 }

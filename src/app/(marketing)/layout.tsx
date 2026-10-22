@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
 import { currentYear } from "@/lib/time";
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-1 flex-col">
       <header className="flex items-center justify-between border-b px-6 py-4">
-        <Link href="/" className="text-lg font-semibold tracking-tight">
-          ClubHub
-        </Link>
+        <Logo />
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground sm:flex">
           <Link href="/features" className="hover:text-foreground">
             Features

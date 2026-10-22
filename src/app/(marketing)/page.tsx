@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Calendar, Check, PiggyBank, Users } from "lucide-react";
+import { Calendar, Car, Check, PiggyBank, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,24 +35,60 @@ const ICON_BADGE_STYLES = {
   violet: "bg-violet-100 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400",
 };
 
+/** Decorative mini preview of the dashboard, purely illustrative (no real data). */
+function HeroPreview() {
+  return (
+    <Card className="w-full max-w-md shadow-xl">
+      <CardHeader>
+        <CardTitle className="text-sm text-muted-foreground">Punktspiel vs. TSV Nordlicht</CardTitle>
+        <CardDescription>Fr, 19:30 Uhr</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <div className="grid grid-cols-3 gap-2 text-center text-xs font-medium">
+          <div className="flex flex-col items-center gap-1 rounded-md bg-blue-100 py-3 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+            <Calendar className="size-4" /> 12 Zusagen
+          </div>
+          <div className="flex flex-col items-center gap-1 rounded-md bg-emerald-100 py-3 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+            <PiggyBank className="size-4" /> Kasse ok
+          </div>
+          <div className="flex flex-col items-center gap-1 rounded-md bg-violet-100 py-3 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400">
+            <Users className="size-4" /> 3 Sparten
+          </div>
+        </div>
+        <div className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
+          <span className="flex items-center gap-2 text-muted-foreground">
+            <Car className="size-4" /> Freie Plätze im Auto
+          </span>
+          <span className="font-semibold">2</span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Home() {
   return (
     <>
       <section className="bg-gradient-to-b from-indigo-50 via-white to-white dark:from-indigo-950/30 dark:via-background dark:to-background">
-        <div className="mx-auto flex max-w-3xl flex-col items-center justify-center gap-6 px-6 py-24 text-center">
-          <h1 className="max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
-            Schluss mit dem Chaos im Vereins- und Teamalltag.
-          </h1>
-          <p className="max-w-xl text-lg text-muted-foreground">
-            Termine, Kasse & Sponsoren für jeden Verein und jede Mannschaft – in einer App.
-          </p>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href="/signup">Jetzt Verein kostenlos anlegen</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link href="/demo">Demo ansehen</Link>
-            </Button>
+        <div className="mx-auto grid max-w-5xl items-center gap-10 px-6 py-20 lg:grid-cols-2 lg:py-24">
+          <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
+            <h1 className="max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
+              Schluss mit dem Chaos im Vereins- und Teamalltag.
+            </h1>
+            <p className="max-w-xl text-lg text-muted-foreground">
+              Termine, Kasse & Sponsoren für jeden Verein und jede Mannschaft – in einer App.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg">
+                <Link href="/signup">Jetzt Verein kostenlos anlegen</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href="/demo">Demo ansehen</Link>
+              </Button>
+            </div>
+          </div>
+          <div className="flex justify-center lg:justify-end">
+            <HeroPreview />
           </div>
         </div>
       </section>

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createTenant } from "./actions";
+import { AuthShell } from "@/components/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,7 +42,7 @@ export default async function OnboardingPage({
   // that instead of silently treating it as "no membership yet".
   if (membershipError) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-6">
+      <AuthShell>
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-xl">Etwas ist schiefgelaufen</CardTitle>
@@ -51,12 +52,12 @@ export default async function OnboardingPage({
             </CardDescription>
           </CardHeader>
         </Card>
-      </main>
+      </AuthShell>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-6">
+    <AuthShell>
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-xl">Deinen Verein anlegen</CardTitle>
@@ -102,6 +103,6 @@ export default async function OnboardingPage({
           </form>
         </CardContent>
       </Card>
-    </main>
+    </AuthShell>
   );
 }

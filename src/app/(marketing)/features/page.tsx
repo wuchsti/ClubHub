@@ -33,6 +33,36 @@ function SectionEyebrow({ color, children }: { color: string; children: React.Re
   );
 }
 
+/** Illustrative sponsor-logo mockup for the Sponsoring section's preview card. */
+function BakerySponsorLogo() {
+  return (
+    <div className="flex items-center gap-3">
+      <svg viewBox="0 0 40 40" className="size-10 shrink-0" aria-hidden>
+        <circle cx="20" cy="20" r="20" fill="#fef3c7" />
+        <path
+          d="M11 23c0-5 4-9 9-9s9 4 9 9c0 1-1 2-2 2H13c-1 0-2-1-2-2Z"
+          fill="#d97706"
+        />
+        <path
+          d="M15 14c0-2 2-4 5-4s5 2 5 4-2 3-5 3-5-1-5-3Z"
+          fill="#f59e0b"
+        />
+        <circle cx="16" cy="22" r="1.2" fill="#fef3c7" />
+        <circle cx="20" cy="20" r="1.2" fill="#fef3c7" />
+        <circle cx="24" cy="22" r="1.2" fill="#fef3c7" />
+      </svg>
+      <span className="text-left leading-tight">
+        <span className="block text-sm font-semibold tracking-tight text-amber-900 dark:text-amber-200">
+          Bäckerei Mustermann
+        </span>
+        <span className="block text-xs text-amber-700/70 dark:text-amber-400/70">
+          Frisch seit 1987
+        </span>
+      </span>
+    </div>
+  );
+}
+
 export default function FeaturesPage() {
   return (
     <>
@@ -181,8 +211,8 @@ export default function FeaturesPage() {
             <CardHeader>
               <CardTitle className="text-sm text-muted-foreground">Sponsor des Tages</CardTitle>
             </CardHeader>
-            <CardContent className="flex h-20 items-center justify-center rounded-md bg-white text-sm font-medium text-muted-foreground">
-              [ Logo: Bäckerei Mustermann ]
+            <CardContent className="flex h-20 items-center justify-center rounded-md bg-white">
+              <BakerySponsorLogo />
             </CardContent>
           </Card>
           <div className="order-1 sm:order-2">
