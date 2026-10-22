@@ -25,7 +25,7 @@ export default async function OnboardingPage({
     redirect("/login?redirect=/onboarding");
   }
 
-  const { data: existingMembership } = await supabase
+  const { data: existingMembership, error: membershipError } = await supabase
     .from("memberships")
     .select("tenant_id")
     .eq("user_id", user.id)
@@ -34,6 +34,25 @@ export default async function OnboardingPage({
 
   if (existingMembership) {
     redirect("/dashboard");
+  }
+
+  // `.maybeSingle()` only returns an error for a real failure (e.g. a
+  // missing database grant) - zero rows is data: null, error: null. Surface
+  // that instead of silently treating it as "no membership yet".
+  if (membershipError) {
+    return (
+      <main className="flex min-h-screen items-center justify-center p-6">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-xl">Etwas ist schiefgelaufen</CardTitle>
+            <CardDescription>
+              Deine Mitgliedschaften konnten nicht geladen werden ({membershipError.message}).
+              Bitte versuche es gleich noch einmal oder kontaktiere den Support.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </main>
+    );
   }
 
   return (
@@ -54,7 +73,7 @@ export default async function OnboardingPage({
                 id="name"
                 name="name"
                 type="text"
-                placeholder="z. B. VfL Hitzhusen"
+                placeholder="z. B. SV Rosental"
                 required
               />
             </div>
@@ -66,7 +85,7 @@ export default async function OnboardingPage({
                 id="slug"
                 name="slug"
                 type="text"
-                placeholder="vfl-hitzhusen"
+                placeholder="sv-rosental"
               />
               <p className="text-xs text-muted-foreground">
                 Leer lassen, um die URL automatisch aus dem Vereinsnamen zu erzeugen.

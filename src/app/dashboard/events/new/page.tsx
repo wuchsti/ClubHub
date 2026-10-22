@@ -102,11 +102,11 @@ export default async function NewEventPage({
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="title">Titel</Label>
-              <Input id="title" name="title" placeholder="z. B. Punktspiel vs. DC Snipers" required />
+              <Input id="title" name="title" placeholder="z. B. Punktspiel vs. TSV Nordlicht" required />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="location">Ort</Label>
-              <Input id="location" name="location" placeholder="z. B. Glückstädter Str. 5" />
+              <Input id="location" name="location" placeholder="z. B. Mühlenweg 8, Hamburg-Altona" />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="startsAt">Datum & Uhrzeit</Label>

@@ -51,7 +51,7 @@ export default function Home() {
               <Link href="/signup">Jetzt Verein kostenlos anlegen</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link href="/login">Demo ansehen</Link>
+              <Link href="/demo">Demo ansehen</Link>
             </Button>
           </div>
         </div>

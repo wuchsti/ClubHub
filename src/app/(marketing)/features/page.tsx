@@ -64,9 +64,9 @@ export default function FeaturesPage() {
           </div>
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="text-base">Punktspiel vs. DC Snipers</CardTitle>
+              <CardTitle className="text-base">Punktspiel vs. TSV Nordlicht</CardTitle>
               <p className="flex items-center gap-1 text-sm text-muted-foreground">
-                <MapPin className="size-3.5" /> Fr, 19:30 Uhr · Glückstädter Str. 5
+                <MapPin className="size-3.5" /> Fr, 19:30 Uhr · Mühlenweg 8, Hamburg-Altona
               </p>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">

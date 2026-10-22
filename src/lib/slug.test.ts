@@ -3,7 +3,7 @@ import { slugify } from "./slug";
 
 describe("slugify", () => {
   it("lowercases and dashes spaces", () => {
-    expect(slugify("VfL Hitzhusen")).toBe("vfl-hitzhusen");
+    expect(slugify("SV Rosental")).toBe("sv-rosental");
   });
 
   it("transliterates German umlauts", () => {
