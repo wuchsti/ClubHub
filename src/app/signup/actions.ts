@@ -2,11 +2,13 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSiteUrl } from "@/lib/site-url";
 
 export async function signup(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const fullName = String(formData.get("fullName") ?? "").trim();
+  const redirectTo = String(formData.get("redirect") ?? "/onboarding");
 
   if (!email || !password || password.length < 8) {
     redirect(
@@ -22,7 +24,7 @@ export async function signup(formData: FormData) {
     password,
     options: {
       data: { full_name: fullName || null },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/auth/callback?redirect=/onboarding`,
+      emailRedirectTo: `${getSiteUrl()}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`,
     },
   });
 

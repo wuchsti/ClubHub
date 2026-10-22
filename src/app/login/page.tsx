@@ -55,7 +55,10 @@ export default async function LoginPage({
           </form>
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Noch kein Verein?{" "}
-            <Link href="/signup" className="font-medium text-foreground underline-offset-4 hover:underline">
+            <Link
+              href={redirectTo ? `/signup?redirect=${encodeURIComponent(redirectTo)}` : "/signup"}
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
               Jetzt kostenlos registrieren
             </Link>
           </p>

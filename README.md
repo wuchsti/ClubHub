@@ -22,8 +22,10 @@ Micro-SaaS für deutsche Sportvereine (DSGVO-konform).
    supabase db push
    ```
 
-   Die Migration liegt unter `supabase/migrations/20261022000000_init_multitenancy.sql`
-   und legt die Tabellen `tenants`, `profiles`, `memberships` inkl. RLS-Policies an.
+   Es gibt zwei Migrationen (in dieser Reihenfolge anwenden):
+   - `20261022000000_init_multitenancy.sql` – `tenants`, `profiles`, `memberships` inkl. RLS.
+   - `20261022010000_phase2_core_features.sql` – `teams`, `team_members`, `events`,
+     `event_rsvps`, `invites` inkl. RLS und der `redeem_invite`/`invite_preview`-Funktionen.
 4. Abhängigkeiten installieren und Dev-Server starten:
 
    ```bash
@@ -39,7 +41,7 @@ Micro-SaaS für deutsche Sportvereine (DSGVO-konform).
 | Phase | Inhalt | Status |
 | --- | --- | --- |
 | **1** | Fundament, Auth & Multi-Tenancy Setup | ✅ umgesetzt in diesem Branch |
-| 2 | Core Features (Termine & Kader-Logik) | geplant |
+| **2** | Core Features (Termine & Kader-Logik) | ✅ umgesetzt in diesem Branch |
 | 3 | Finanzen, Kassenbuch & Sponsoring | geplant |
 | 4 | Rechtliches, statische Seiten & Admin-Overlord | geplant |
 | 5 | Testing, Optimierung & Deployment | geplant |
@@ -59,6 +61,26 @@ Micro-SaaS für deutsche Sportvereine (DSGVO-konform).
 - Geschütztes Dashboard (`/dashboard`), das Nutzer ohne Vereinszugehörigkeit
   automatisch zu `/onboarding` weiterleitet.
 
-Die übrigen Phasen (Termine, Kassenbuch/SEPA, Sponsoring, rechtliche Seiten,
+### Phase 2 im Detail
+
+- **Sparten/Teams (VA-01):** `/dashboard/teams` zum Anlegen von Sparten
+  (owner/admin), `/dashboard/teams/[teamId]` als Kader-Verwaltung inkl.
+  Rollenvergabe (Kapitän/Mitglied) und Entfernen von Mitgliedern.
+- **Einladungs-System (VA-02):** `/dashboard/teams/[teamId]/invite` erzeugt
+  Mehrfach-Einladungslinks + QR-Code (`qrcode.react`); `/invite/[token]` ist
+  die öffentliche Landing-Page, die nach Login/Registrierung die
+  Vereins- und Sparten-Mitgliedschaft über die SECURITY DEFINER-Funktion
+  `redeem_invite` herstellt (kein direkter Tabellenzugriff auf `invites`
+  nötig). Signup/Login tragen dafür optional einen `redirect`-Parameter
+  durch die E-Mail-Bestätigung hindurch.
+- **Termine (VA-03):** `/dashboard/events` (kommend/vergangen),
+  `/dashboard/events/new` (owner/admin oder Kapitän der jeweiligen Sparte),
+  `/dashboard/events/[eventId]` mit Rückmeldungs-Übersicht.
+- **Rückmeldungen & Fahrgemeinschaften (M-01/M-02):** `RsvpWidget`
+  (Zusage/Absage/Unsicher, Absagegrund, Fahrgemeinschafts-Counter bei
+  Zusage) wird sowohl auf der Termin-Detailseite als auch als "Nächster
+  Termin"-Karte direkt im mobilen Dashboard verwendet.
+
+Die übrigen Phasen (Kassenbuch/SEPA, Sponsoring, rechtliche Seiten,
 Super-Admin-Dashboard, Tests & Deployment) sind in der vollständigen SRS
 beschrieben und folgen in weiteren Iterationen.

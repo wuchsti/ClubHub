@@ -1,6 +1,9 @@
 export type AppRole = "owner" | "admin" | "captain" | "member";
 export type TenantStatus = "trialing" | "active" | "past_due" | "canceled";
 export type TenantPlan = "starter" | "pro" | "allin";
+export type TeamRole = "captain" | "member";
+export type EventType = "training" | "game" | "event";
+export type RsvpStatus = "yes" | "no" | "maybe";
 
 export interface Database {
   public: {
@@ -77,13 +80,190 @@ export interface Database {
           },
         ];
       };
+      teams: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          name: string;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          name: string;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["teams"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "teams_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      team_members: {
+        Row: {
+          id: string;
+          team_id: string;
+          user_id: string;
+          role: TeamRole;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          user_id: string;
+          role?: TeamRole;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["team_members"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      events: {
+        Row: {
+          id: string;
+          team_id: string;
+          type: EventType;
+          title: string;
+          location: string | null;
+          starts_at: string;
+          rsvp_deadline: string | null;
+          notes: string | null;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          type?: EventType;
+          title: string;
+          location?: string | null;
+          starts_at: string;
+          rsvp_deadline?: string | null;
+          notes?: string | null;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["events"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "events_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      event_rsvps: {
+        Row: {
+          id: string;
+          event_id: string;
+          user_id: string;
+          status: RsvpStatus;
+          decline_reason: string | null;
+          carpool_seats: number | null;
+          responded_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          user_id: string;
+          status: RsvpStatus;
+          decline_reason?: string | null;
+          carpool_seats?: number | null;
+          responded_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["event_rsvps"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "event_rsvps_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      invites: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          team_id: string | null;
+          token: string;
+          role: AppRole;
+          max_uses: number;
+          use_count: number;
+          expires_at: string;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          team_id?: string | null;
+          token?: string;
+          role?: AppRole;
+          max_uses?: number;
+          use_count?: number;
+          expires_at?: string;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["invites"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "invites_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invites_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      redeem_invite: {
+        Args: { p_token: string };
+        Returns: { tenant_id: string; team_id: string | null; tenant_slug: string | null }[];
+      };
+      invite_preview: {
+        Args: { p_token: string };
+        Returns: { valid: boolean; tenant_name: string; team_name: string | null }[];
+      };
+    };
     Enums: {
       app_role: AppRole;
       tenant_status: TenantStatus;
       tenant_plan: TenantPlan;
+      team_role: TeamRole;
+      event_type: EventType;
+      rsvp_status: RsvpStatus;
     };
     CompositeTypes: Record<string, never>;
   };

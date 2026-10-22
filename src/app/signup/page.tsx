@@ -14,21 +14,27 @@ import {
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; redirect?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, redirect: redirectTo } = await searchParams;
+  const isInvite = redirectTo?.startsWith("/invite/");
 
   return (
     <div className="flex min-h-screen items-center justify-center p-6">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-xl">Verein kostenlos anlegen</CardTitle>
+          <CardTitle className="text-xl">
+            {isInvite ? "Konto erstellen & Einladung annehmen" : "Verein kostenlos anlegen"}
+          </CardTitle>
           <CardDescription>
-            Erstelle dein ClubHub-Konto. Im nächsten Schritt legst du deinen Verein an.
+            {isInvite
+              ? "Erstelle dein ClubHub-Konto, um der Einladung zu folgen."
+              : "Erstelle dein ClubHub-Konto. Im nächsten Schritt legst du deinen Verein an."}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form action={signup} className="flex flex-col gap-4">
+            <input type="hidden" name="redirect" value={redirectTo ?? "/onboarding"} />
             <div className="flex flex-col gap-2">
               <Label htmlFor="fullName">Name</Label>
               <Input id="fullName" name="fullName" type="text" autoComplete="name" required />
@@ -59,7 +65,10 @@ export default async function SignupPage({
           </form>
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Bereits registriert?{" "}
-            <Link href="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+            <Link
+              href={redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : "/login"}
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
               Anmelden
             </Link>
           </p>
