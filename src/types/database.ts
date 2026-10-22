@@ -326,7 +326,7 @@ export interface Database {
           stripe_checkout_session_id?: string | null;
           stripe_payment_intent_id?: string | null;
           paid_at?: string | null;
-          created_by: string;
+          created_by?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["ledger_entries"]["Insert"]>;
@@ -343,6 +343,85 @@ export interface Database {
             columns: ["team_id"];
             isOneToOne: false;
             referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      membership_fee_plans: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          team_id: string | null;
+          label: string;
+          amount_cents: number;
+          interval: "month" | "year";
+          stripe_price_id: string | null;
+          is_active: boolean;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          team_id?: string | null;
+          label: string;
+          amount_cents: number;
+          interval: "month" | "year";
+          stripe_price_id?: string | null;
+          is_active?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["membership_fee_plans"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "membership_fee_plans_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "membership_fee_plans_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      membership_subscriptions: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          plan_id: string;
+          member_id: string;
+          stripe_subscription_id: string;
+          stripe_customer_id: string;
+          status: string;
+          current_period_end: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          plan_id: string;
+          member_id: string;
+          stripe_subscription_id: string;
+          stripe_customer_id: string;
+          status?: string;
+          current_period_end?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["membership_subscriptions"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "membership_subscriptions_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "membership_fee_plans";
             referencedColumns: ["id"];
           },
         ];
