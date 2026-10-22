@@ -49,7 +49,7 @@ export async function setTenantPlan(formData: FormData) {
     .eq("id", tenantId);
 
   if (error) {
-    fail(tenantId, "Tarif konnte nicht gesetzt werden.");
+    fail(tenantId, `Tarif konnte nicht gesetzt werden (${error.code ?? "?"}: ${error.message}).`);
   }
 
   revalidatePath(`/admin/tenants/${tenantId}`);
