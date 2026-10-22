@@ -14,6 +14,12 @@ export async function createTenant(formData: FormData) {
     redirect("/login?redirect=/onboarding");
   }
 
+  // TEMPORARY DEBUG - remove once the RLS mismatch is diagnosed. Not in the
+  // typed Database["public"]["Functions"] map since it's throwaway.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: whoami } = await (supabase.rpc as any)("debug_whoami");
+  console.log("DEBUG createTenant", { expectedUserId: user.id, whoami });
+
   const name = String(formData.get("name") ?? "").trim();
   const requestedSlug = String(formData.get("slug") ?? "").trim();
   const baseSlug = slugify(requestedSlug || name);
@@ -44,9 +50,10 @@ export async function createTenant(formData: FormData) {
     }
 
     if (error.code !== POSTGRES_UNIQUE_VIOLATION) {
+      // TEMPORARY DEBUG - shows the auth.uid() mismatch directly on the page.
       redirect(
         `/onboarding?error=${encodeURIComponent(
-          "Verein konnte nicht angelegt werden. Bitte später erneut versuchen."
+          `DEBUG ${error.code} ${error.message} | expected=${user.id} whoami=${JSON.stringify(whoami)}`
         )}`
       );
     }
