@@ -1,6 +1,15 @@
 import Link from "next/link";
-import { CalendarDays, LayoutDashboard, LogOut, ShieldCheck, Users } from "lucide-react";
-import { getMembershipContext } from "@/lib/membership";
+import {
+  CalendarDays,
+  CreditCard,
+  LayoutDashboard,
+  LogOut,
+  Megaphone,
+  PiggyBank,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
+import { getMembershipContext, isTenantManager } from "@/lib/membership";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -17,12 +26,21 @@ const NAV_ITEMS = [
   { href: "/dashboard/events", label: "Termine", icon: CalendarDays },
 ];
 
+const MANAGER_NAV_ITEMS = [
+  { href: "/dashboard/finance", label: "Kasse", icon: PiggyBank },
+  { href: "/dashboard/sponsors", label: "Sponsoren", icon: Megaphone },
+  { href: "/dashboard/billing", label: "Abo", icon: CreditCard },
+];
+
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const membership = await getMembershipContext();
+  const navItems = isTenantManager(membership.role)
+    ? [...NAV_ITEMS, ...MANAGER_NAV_ITEMS]
+    : NAV_ITEMS;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -44,7 +62,7 @@ export default async function DashboardLayout({
       </header>
       <div className="flex flex-1">
         <nav className="hidden w-56 flex-col gap-1 border-r p-4 sm:flex">
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}

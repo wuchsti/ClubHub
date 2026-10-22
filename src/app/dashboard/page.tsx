@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getMembershipContext } from "@/lib/membership";
 import { upsertRsvp } from "./events/[eventId]/actions";
 import { RsvpWidget } from "@/components/rsvp-widget";
+import { SponsorCard } from "@/components/sponsor-card";
 import {
   Card,
   CardContent,
@@ -48,6 +49,14 @@ export default async function DashboardPage() {
         .eq("user_id", membership.userId)
         .maybeSingle()
     : { data: null };
+
+  const { data: openEntries } = await supabase
+    .from("ledger_entries")
+    .select("amount_cents")
+    .eq("member_id", membership.userId)
+    .eq("status", "open");
+
+  const openTotalCents = (openEntries ?? []).reduce((sum, entry) => sum + entry.amount_cents, 0);
 
   return (
     <div className="flex flex-col gap-6">
@@ -108,9 +117,22 @@ export default async function DashboardPage() {
             <CardHeader>
               <PiggyBank className="size-5 text-muted-foreground" />
               <CardTitle className="text-base">Offene Beträge</CardTitle>
-              <CardDescription>Keine offenen Posten.</CardDescription>
+              <CardDescription>
+                {openTotalCents > 0
+                  ? `${(openTotalCents / 100).toLocaleString("de-DE", { minimumFractionDigits: 2 })} €`
+                  : "Keine offenen Posten."}
+              </CardDescription>
             </CardHeader>
-            <CardContent />
+            <CardContent>
+              {openTotalCents > 0 ? (
+                <Link
+                  href="/dashboard/finance"
+                  className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+                >
+                  Jetzt bezahlen
+                </Link>
+              ) : null}
+            </CardContent>
           </Card>
           <Card>
             <CardHeader>
@@ -120,6 +142,7 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent />
           </Card>
+          <SponsorCard tenantId={membership.tenantId} />
         </div>
       </div>
     </div>

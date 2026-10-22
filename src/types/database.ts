@@ -4,6 +4,7 @@ export type TenantPlan = "starter" | "pro" | "allin";
 export type TeamRole = "captain" | "member";
 export type EventType = "training" | "game" | "event";
 export type RsvpStatus = "yes" | "no" | "maybe";
+export type LedgerStatus = "open" | "paid" | "void";
 
 export interface Database {
   public: {
@@ -16,6 +17,10 @@ export interface Database {
           plan: TenantPlan;
           status: TenantStatus;
           member_limit: number;
+          stripe_customer_id: string | null;
+          stripe_subscription_id: string | null;
+          stripe_connect_account_id: string | null;
+          stripe_connect_charges_enabled: boolean;
           created_by: string;
           created_at: string;
           updated_at: string;
@@ -27,6 +32,10 @@ export interface Database {
           plan?: TenantPlan;
           status?: TenantStatus;
           member_limit?: number;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
+          stripe_connect_account_id?: string | null;
+          stripe_connect_charges_enabled?: boolean;
           created_by: string;
           created_at?: string;
           updated_at?: string;
@@ -245,6 +254,117 @@ export interface Database {
           },
         ];
       };
+      penalty_catalog: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          label: string;
+          default_amount_cents: number;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          label: string;
+          default_amount_cents: number;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["penalty_catalog"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "penalty_catalog_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ledger_entries: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          team_id: string | null;
+          member_id: string;
+          catalog_id: string | null;
+          label: string;
+          amount_cents: number;
+          currency: string;
+          status: LedgerStatus;
+          stripe_checkout_session_id: string | null;
+          stripe_payment_intent_id: string | null;
+          paid_at: string | null;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          team_id?: string | null;
+          member_id: string;
+          catalog_id?: string | null;
+          label: string;
+          amount_cents: number;
+          currency?: string;
+          status?: LedgerStatus;
+          stripe_checkout_session_id?: string | null;
+          stripe_payment_intent_id?: string | null;
+          paid_at?: string | null;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["ledger_entries"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "ledger_entries_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ledger_entries_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      sponsors: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          name: string;
+          logo_path: string;
+          link_url: string | null;
+          is_active: boolean;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          name: string;
+          logo_path: string;
+          link_url?: string | null;
+          is_active?: boolean;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["sponsors"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "sponsors_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -264,6 +384,7 @@ export interface Database {
       team_role: TeamRole;
       event_type: EventType;
       rsvp_status: RsvpStatus;
+      ledger_status: LedgerStatus;
     };
     CompositeTypes: Record<string, never>;
   };
