@@ -24,7 +24,7 @@ export interface Database {
           stripe_connect_charges_enabled: boolean;
           is_suspended: boolean;
           suspended_at: string | null;
-          created_by: string;
+          created_by: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -75,6 +75,7 @@ export interface Database {
           tenant_id: string;
           user_id: string;
           role: AppRole;
+          redeemed_by_invite_id: string | null;
           created_at: string;
         };
         Insert: {
@@ -82,6 +83,7 @@ export interface Database {
           tenant_id: string;
           user_id: string;
           role?: AppRole;
+          redeemed_by_invite_id?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["memberships"]["Insert"]>;
@@ -100,7 +102,7 @@ export interface Database {
           id: string;
           tenant_id: string;
           name: string;
-          created_by: string;
+          created_by: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -159,7 +161,7 @@ export interface Database {
           starts_at: string;
           rsvp_deadline: string | null;
           notes: string | null;
-          created_by: string;
+          created_by: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -227,7 +229,7 @@ export interface Database {
           max_uses: number;
           use_count: number;
           expires_at: string;
-          created_by: string;
+          created_by: string | null;
           created_at: string;
         };
         Insert: {
@@ -266,7 +268,7 @@ export interface Database {
           tenant_id: string;
           label: string;
           default_amount_cents: number;
-          created_by: string;
+          created_by: string | null;
           created_at: string;
         };
         Insert: {
@@ -302,7 +304,7 @@ export interface Database {
           stripe_checkout_session_id: string | null;
           stripe_payment_intent_id: string | null;
           paid_at: string | null;
-          created_by: string;
+          created_by: string | null;
           created_at: string;
         };
         Insert: {
@@ -347,7 +349,7 @@ export interface Database {
           logo_path: string;
           link_url: string | null;
           is_active: boolean;
-          created_by: string;
+          created_by: string | null;
           created_at: string;
         };
         Insert: {
@@ -398,7 +400,7 @@ export interface Database {
           logo_path: string;
           link_url: string | null;
           is_active: boolean;
-          created_by: string;
+          created_by: string | null;
           created_at: string;
         };
         Insert: {
