@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
  * back to the raw Postgres message so a real bug stays diagnosable instead
  * of hiding behind one generic "something went wrong" string.
  */
-function mapRedeemInviteError(error: { code: string; message: string }): string {
+function mapRedeemInviteError(error: { code: string; message: string; details?: string; hint?: string }): string {
   if (error.code === "CH011") {
     return "Der Verein hat das Mitglieder-Limit seines Tarifs erreicht. Bitte den Vorstand, auf Pro Team upzugraden.";
   }
@@ -24,8 +24,10 @@ function mapRedeemInviteError(error: { code: string; message: string }): string 
       return "Dieser Einladungslink wurde bereits zu oft verwendet.";
     case "authentication required":
       return "Bitte melde dich an, um die Einladung anzunehmen.";
-    default:
-      return `Einladung konnte nicht eingelöst werden (${error.message}).`;
+    default: {
+      const extra = [error.code, error.details, error.hint].filter(Boolean).join(" | ");
+      return `Einladung konnte nicht eingelöst werden (${error.message}${extra ? " — " + extra : ""}).`;
+    }
   }
 }
 
