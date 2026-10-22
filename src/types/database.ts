@@ -17,6 +17,7 @@ export interface Database {
           plan: TenantPlan;
           status: TenantStatus;
           member_limit: number;
+          team_limit: number;
           stripe_customer_id: string | null;
           stripe_subscription_id: string | null;
           stripe_connect_account_id: string | null;
@@ -34,6 +35,7 @@ export interface Database {
           plan?: TenantPlan;
           status?: TenantStatus;
           member_limit?: number;
+          team_limit?: number;
           stripe_customer_id?: string | null;
           stripe_subscription_id?: string | null;
           stripe_connect_account_id?: string | null;

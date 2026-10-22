@@ -14,7 +14,11 @@ export async function acceptInvite(formData: FormData) {
   const { error } = await supabase.rpc("redeem_invite", { p_token: token });
 
   if (error) {
-    redirect(`/invite/${token}?error=${encodeURIComponent("Einladung konnte nicht eingelöst werden.")}`);
+    const message =
+      error.code === "CH011"
+        ? "Der Verein hat das Mitglieder-Limit seines Tarifs erreicht. Bitte den Vorstand, auf Pro Team upzugraden."
+        : "Einladung konnte nicht eingelöst werden.";
+    redirect(`/invite/${token}?error=${encodeURIComponent(message)}`);
   }
 
   redirect("/dashboard");

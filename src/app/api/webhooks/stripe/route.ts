@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase/service";
+import { PLAN_LIMITS } from "@/lib/plan-limits";
 import type { TenantPlan, TenantStatus } from "@/types/database";
 
 function mapSubscriptionStatus(status: Stripe.Subscription.Status): TenantStatus {
@@ -52,6 +53,8 @@ export async function POST(request: Request) {
             .update({
               plan,
               status: "active",
+              member_limit: PLAN_LIMITS[plan].members,
+              team_limit: PLAN_LIMITS[plan].teams,
               stripe_subscription_id:
                 typeof session.subscription === "string" ? session.subscription : null,
             })
@@ -83,11 +86,18 @@ export async function POST(request: Request) {
 
       if (tenantId) {
         const isCanceled = event.type === "customer.subscription.deleted";
+        const effectivePlan: TenantPlan | undefined = isCanceled ? "starter" : plan;
         await supabase
           .from("tenants")
           .update({
             status: isCanceled ? "canceled" : mapSubscriptionStatus(subscription.status),
-            plan: isCanceled ? "starter" : plan,
+            plan: effectivePlan,
+            ...(effectivePlan
+              ? {
+                  member_limit: PLAN_LIMITS[effectivePlan].members,
+                  team_limit: PLAN_LIMITS[effectivePlan].teams,
+                }
+              : {}),
             stripe_subscription_id: subscription.id,
           })
           .eq("id", tenantId);

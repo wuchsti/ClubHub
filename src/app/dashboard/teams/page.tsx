@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { Lock, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getMembershipContext, isTenantManager } from "@/lib/membership";
 import { createTeam } from "./actions";
@@ -24,11 +24,20 @@ export default async function TeamsPage({
   const supabase = await createClient();
   const canManage = isTenantManager(membership.role);
 
+  const { data: tenant } = await supabase
+    .from("tenants")
+    .select("team_limit")
+    .eq("id", membership.tenantId)
+    .single();
+
   const { data: teams } = await supabase
     .from("teams")
     .select("id, name, created_at")
     .eq("tenant_id", membership.tenantId)
     .order("created_at", { ascending: true });
+
+  const teamLimit = tenant?.team_limit ?? 1;
+  const atTeamLimit = (teams?.length ?? 0) >= teamLimit;
 
   const teamIds = (teams ?? []).map((team) => team.id);
   const memberCounts = new Map<string, number>();
@@ -77,20 +86,40 @@ export default async function TeamsPage({
         <Card className="max-w-sm">
           <CardHeader>
             <CardTitle className="text-base">Neue Sparte anlegen</CardTitle>
+            {atTeamLimit ? (
+              <CardDescription>
+                Sparten-Limit erreicht ({teams?.length ?? 0}/{teamLimit}).
+              </CardDescription>
+            ) : null}
           </CardHeader>
           <CardContent>
-            <form action={createTeam} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" placeholder="z. B. 1. Herren Dart" required />
-              </div>
-              {error ? (
-                <p className="text-sm text-destructive" role="alert">
-                  {error}
+            {atTeamLimit ? (
+              <div className="flex flex-col gap-3 rounded-lg border border-primary/50 bg-muted/30 p-4">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Lock className="size-4 text-muted-foreground" />
+                  Im Starter-Tarif ist 1 Sparte enthalten
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Upgrade auf Pro Team für unbegrenzt viele Sparten.
                 </p>
-              ) : null}
-              <Button type="submit">Sparte anlegen</Button>
-            </form>
+                <Button asChild size="sm" className="w-fit">
+                  <Link href="/dashboard/billing">Jetzt upgraden</Link>
+                </Button>
+              </div>
+            ) : (
+              <form action={createTeam} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input id="name" name="name" placeholder="z. B. 1. Herren Dart" required />
+                </div>
+                {error ? (
+                  <p className="text-sm text-destructive" role="alert">
+                    {error}
+                  </p>
+                ) : null}
+                <Button type="submit">Sparte anlegen</Button>
+              </form>
+            )}
           </CardContent>
         </Card>
       ) : null}

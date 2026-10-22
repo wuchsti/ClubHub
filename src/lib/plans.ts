@@ -12,14 +12,14 @@ export const PLANS: {
     key: "starter",
     name: "Starter",
     price: "0 € / Monat",
-    features: ["Bis 15 Mitglieder", "Basis-Termine", "Mit Werbung"],
+    features: ["1 Sparte", "Bis 10 Mitglieder", "Basis-Termine", "Mit Werbung"],
     launched: true,
   },
   {
     key: "pro",
     name: "Pro Team",
     price: "9,90 € / Monat",
-    features: ["Unbegrenzt Mitglieder", "Kassenbuch/SEPA", "Werbefrei"],
+    features: ["Unbegrenzt Sparten & Mitglieder", "Kassenbuch/SEPA", "Werbefrei"],
     launched: true,
   },
   {

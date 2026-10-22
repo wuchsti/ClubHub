@@ -26,7 +26,11 @@ export async function createTeam(formData: FormData) {
   });
 
   if (error) {
-    redirect("/dashboard/teams?error=" + encodeURIComponent("Sparte konnte nicht angelegt werden."));
+    const message =
+      error.code === "CH010"
+        ? "Sparten-Limit erreicht. Upgrade auf Pro Team für mehr Sparten."
+        : "Sparte konnte nicht angelegt werden.";
+    redirect("/dashboard/teams?error=" + encodeURIComponent(message));
   }
 
   revalidatePath("/dashboard/teams");
